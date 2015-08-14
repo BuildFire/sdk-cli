@@ -1,6 +1,6 @@
 {
   "name": "buildfire-sdk",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Software Development Kit for developing plugins for the BuildFire mobile app building platform",
   "repository": {
     "type": "git",
@@ -10,9 +10,9 @@
     "url": "https://github.com/buildfire/sdk/issues"
   },
   "homepage": "https://github.com/buildfire/sdk",
-  "dependencies":{
-    "adm-zip":"0.4.*"
-    ,"ncp":"2.0.*"
+  "dependencies": {
+    "adm-zip": "0.4.*",
+    "ncp": "2.0.*"
   },
   "bin": {
     "buildfire": "./bin.js"
