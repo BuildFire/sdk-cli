@@ -13,3 +13,4 @@ This will install the `buildfire' command line gloabally
 ### commands:
 * `create` will download the latest SDK to the current folder
 * `update` will download the latest SDK and update the current folder
+* 'plugin' takes [plugin name] will download latest version of the indicated plugin to the current folder
