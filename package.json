@@ -21,7 +21,8 @@
     "buildfire",
     "sdk",
     "mobile",
-    "plugin"
+    "plugin",
+    "cli"
   ],
   "author": "Daniel Hindi",
   "license": "MIT"

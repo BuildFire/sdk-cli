@@ -7,7 +7,7 @@ var http = require('https');
 var fs =require('fs');
 var AdmZip = require('adm-zip');
 var ncp = require('ncp').ncp;
-var path = require ("path")
+var path = require ("path");
 ncp.limit = 32;
 
 
@@ -27,7 +27,13 @@ var rmdir = function(dir) {
             fs.unlinkSync(filename);
         }
     }
-    fs.rmdirSync(dir);
+    //console.log('delete folder',dir);
+    try{
+        fs.rmdirSync(dir)
+    }
+    catch(e){
+
+    }
 };
 
 var download = function(url,localZipPath) {
@@ -57,6 +63,7 @@ var download = function(url,localZipPath) {
                     if (err) console.error(err);
                     console.log('clean up...');
                     rmdir('./sdk-master');
+                    rmdir('./sdk-master');
                 });
             });
 
@@ -67,5 +74,18 @@ var download = function(url,localZipPath) {
     });
 };
 
+/* args
+node.exe
+path
+[command]
+ */
+if(process.argv.length < 3 || ['-help','help','?','/?'].indexOf(process.argv[2].toLowerCase()) >= 0 ){
+    console.log('==================================================');
+    console.log('arguments:');
+    console.log('* create: this will download latest BuildFire SDK in the current folder');
+}
+else if(process.argv[2].toLowerCase() == "create")
+    download("https://github.com/BuildFire/sdk/archive/master.zip","./_tempsdk.zip");
+else
+    console.error('unknown command');
 
-download("https://github.com/BuildFire/sdk/archive/master.zip","./_tempsdk.zip");
