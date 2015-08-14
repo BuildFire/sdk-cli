@@ -6,5 +6,5 @@ This Command Line Interface it meant for use with npm
 This will install the `buildfire' command line gloabally
 
 Then use:
-`buildfire create'
+`buildfire create`
 to initialize your folder. It will download the latest SDK to the current folder
