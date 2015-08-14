@@ -36,13 +36,20 @@ var rmdir = function(dir) {
     }
 };
 
-var download = function(url,localZipPath) {
+var downloadRepo = function(repoName,url) {
+    if(!url)
+        url="https://github.com/BuildFire/" + repoName + "/archive/master.zip";
+    var localZipPath= "_" + repoName + ".zip";
 
     var file = fs.createWriteStream(localZipPath);
     var request = http.get(url, function(response) {
-        if([301,302].indexOf(response.statusCode) > -1){
+        if(response.statusCode == 404){
+            console.error('invalid repo');
+            return;
+        }
+        else if([301,302].indexOf(response.statusCode) > -1){
             console.warn('file has been redirected');
-            download(response.headers.location,localZipPath);
+            downloadRepo(repoName, response.headers.location);
             return;
         }
 
@@ -50,19 +57,18 @@ var download = function(url,localZipPath) {
         response.pipe(file);
         file.on('finish',function(){
             console.log('downloaded zip.');
-            file.close(function(a){
-                console.log(a);
+            file.close(function(){
                 console.log('unzipping...');
+
                 var zip = new AdmZip(localZipPath);
-                console.log('upzipping...');
                 zip.extractAllTo("./" );
                 console.log('delete zip file.');
                 fs.unlink(localZipPath);
                 console.log('move files to root...');
-                ncp('./sdk-master', './', function (err) {
+                ncp('./' + repoName + '-master', './', function (err) {
                     if (err) console.error(err);
                     console.log('clean up...');
-                    rmdir('./sdk-master');
+                    rmdir('./' + repoName + '-master');
                 });
             });
 
@@ -81,11 +87,19 @@ path
 if(process.argv.length < 3 || ['-help','help','?','/?'].indexOf(process.argv[2].toLowerCase()) >= 0 ){
     console.log('==================================================');
     console.log('arguments:');
-    console.log('* create: this will download latest BuildFire SDK in the current folder');
-    console.log('* update: this will download latest BuildFire SDK and update the current folder');
+    console.log('* create: this will download the latest BuildFire SDK in the current folder');
+    console.log('* update: this will download the latest BuildFire SDK and update the current folder');
+    console.log('* plugin [plugin name]: this will download the latest version of the indicated plugin in the current folder');
+    console.log('// many plugins are open source (MIT) feel free to Fork them on github http://github.com/buildfire');
 }
 else if(["create","update"].indexOf( process.argv[2].toLowerCase() ) >=0 )
-    download("https://github.com/BuildFire/sdk/archive/master.zip","./_tempsdk.zip");
+    downloadRepo('sdk');
+else if(process.argv[2].toLowerCase() =="plugin"  ) {
+    if(process.argv.length < 4)
+        console.error('* you forgot to indicate which plugin');
+    else
+        downloadRepo(process.argv[3]);
+}
 else
     console.error('unknown command');
 
