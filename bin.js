@@ -63,7 +63,6 @@ var download = function(url,localZipPath) {
                     if (err) console.error(err);
                     console.log('clean up...');
                     rmdir('./sdk-master');
-                    rmdir('./sdk-master');
                 });
             });
 
@@ -83,8 +82,9 @@ if(process.argv.length < 3 || ['-help','help','?','/?'].indexOf(process.argv[2].
     console.log('==================================================');
     console.log('arguments:');
     console.log('* create: this will download latest BuildFire SDK in the current folder');
+    console.log('* update: this will download latest BuildFire SDK and update the current folder');
 }
-else if(process.argv[2].toLowerCase() == "create")
+else if(["create","update"].indexOf( process.argv[2].toLowerCase() ) >=0 )
     download("https://github.com/BuildFire/sdk/archive/master.zip","./_tempsdk.zip");
 else
     console.error('unknown command');
