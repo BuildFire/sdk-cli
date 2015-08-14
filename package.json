@@ -1,6 +1,6 @@
 {
   "name": "buildfire-sdk",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Software Development Kit for developing plugins for the BuildFire mobile app building platform",
   "repository": {
     "type": "git",
