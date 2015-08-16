@@ -7,7 +7,10 @@ var http = require('https'),
     AdmZip = require('adm-zip'),
     ncp = require('ncp').ncp,
     path = require("path"),
-    rmdir = require('rimraf');
+    rmdir = require('rimraf'),
+    ProgressBar = require('progress');
+var green = '\u001b[42m \u001b[0m';
+var red = '\u001b[41m \u001b[0m';
 var argv = require('yargs')
     .usage('npm <command>')
     .command('install', 'This will download the latest BuildFire SDK in the current folder')
@@ -27,9 +30,7 @@ var argv = require('yargs')
     .epilog("Copyright 2015 Buildfire")
     .showHelpOnFail(false, 'whoops, something went wrong! run with --help')
     .argv;
-
 ncp.limit = 32;
-
 var downloadRepo = function (repoName, url) {
     if (!url)
         url = "https://github.com/BuildFire/" + repoName + "/archive/master.zip";
@@ -42,20 +43,27 @@ var downloadRepo = function (repoName, url) {
             return;
         }
         else if ([301, 302].indexOf(response.statusCode) > -1) {
-            console.warn('file has been redirected');
             downloadRepo(repoName, response.headers.location);
             return;
         }
-        console.log('begin downloading zip file...');
+        var barLength = parseInt(response.headers['content-length'], 10) || 10;
+        var bar = new ProgressBar('Downloading [:bar] :percent :etas', {
+            complete: "=",      //use green for finished bar
+            incomplete: ".",    //use red for unfinished bar
+            width: 20,
+            total: barLength
+        });
         response.pipe(file);
+        response.on('data', function (chunk) {
+            bar.tick(chunk.length);
+        });
         file.on('finish', function () {
-            console.log('downloaded zip.');
+            console.log('Downloading zip completed.');
             file.close(function () {
                 console.log('unzipping...');
-
                 var zip = new AdmZip(localZipPath);
                 zip.extractAllTo("./");
-                console.log('delete zip file.');
+                console.log('deleting zip file.');
                 fs.unlink(localZipPath);
                 console.log('move files to root...');
                 ncp('./' + repoName + '-master', './', function (err) {
@@ -67,14 +75,11 @@ var downloadRepo = function (repoName, url) {
                     });
                 });
             });
-
-
         })
     }).on('error', function (err) { // Handle errors
         console.error(err);
     });
 };
-
 /* args
  node.exe
  path
@@ -83,11 +88,12 @@ var downloadRepo = function (repoName, url) {
 var command = argv._[0];
 switch (command) {
     case "install":
-        console.log("install",argv)
+        console.log("install", argv)
         if (argv.p) {
             console.log("peoplePlugin")
             downloadRepo(argv.p);
-        } else {
+        }
+        else {
             console.log("sdk")
             downloadRepo('sdk');
         }
@@ -98,4 +104,3 @@ switch (command) {
     default :
         console.error('unknown command');
 }
-
