@@ -1,4 +1,4 @@
-# BuildFire SDK CLI
+# BuildFire SDK CLI ![](https://api.travis-ci.org/BuildFire/sdk-cli.svg)
 **This Command Line Interface** it meant for use with npm to maintain the BuildFire SDK
 
 `npm install buildfire -g`
