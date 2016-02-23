@@ -12,7 +12,9 @@
   "homepage": "https://github.com/buildfire/sdk-cli",
   "dependencies": {
     "adm-zip": "0.4.*",
-    "ncp": "2.0.*"
+    "ncp": "2.0.*",
+    "async":"1.5.0",
+    "phantom": "0.8.4"
   },
   "bin": {
     "buildfire": "./bin.js"
