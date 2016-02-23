@@ -14,3 +14,4 @@ This will install the `buildfire' command line gloabally
 * `create` will download the latest SDK to the current folder
 * `update` will download the latest SDK and update the current folder
 * `plugin` takes [`plugin name`] will download latest version of the indicated plugin to the current folder. see a full list of open source plugins here http://github.com/buildfire
+* `snapshots` [appId | appUrl]: this will take pictures of the app home page or url requested at multiple resolutions
