@@ -86,32 +86,32 @@ function snapshots(target){
         ,delay: 10000
         ,resolutions:[{
             filename: 'images/iPhone4.png'
-            ,width: 640
-            ,height:960
+            ,width: 640 / 2
+            ,height:960 / 2
         },
             {
                 filename: 'images/iPhone5.png'
-                ,width: 640
-                ,height:1136
+                ,width: 640 /2
+                ,height:1136 /2
             },
             {
                 filename: 'images/iPhone6.png'
-                ,width: 750
-                ,height:1334
+                ,width: 750 /2
+                ,height:1334 /2
             },
             {
                 filename: 'images/iPhone6Plus.png'
-                ,width: 1242
-                ,height:2208
+                ,width: 1242 / 2
+                ,height:2208 / 2
             },
             {
                 filename: 'images/iPad.png'
-                ,width: 1536
-                ,height:2048
+                ,width: 1536 /2
+                ,height:2048 /2
             },{
                 filename: 'images/iPhonePro.png'
-                ,width: 2048
-                ,height:2732
+                ,width: 2048 / 2
+                ,height:2732 /2
             }]
     };
 
