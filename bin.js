@@ -18,14 +18,14 @@ ncp.limit = 32;
 var args = process.argv.slice(2);
 
 switch (args[0]) {
-    case 'download':
-        return require('./cmd/download')(args);
+    case 'create':
+        return require('./cmd/create')(args);
     case 'plugin':
         return require('./cmd/plugin')(args);
     case 'snapshots':
         return require('./cmd/snapshots')(args);
-    case 'create':
-        return require('./cmd/create')(args);
+    case 'init':
+        return require('./cmd/init')(args);
     case 'run':
         return require('./cmd/run')(args);
     case 'build':
