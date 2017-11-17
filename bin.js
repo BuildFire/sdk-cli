@@ -1,7 +1,12 @@
 #! /usr/bin/env node
-/**
- * Created by Daniel on 8/13/2015.
- */
+
+console.log(' ______       _ _     _______ _          ');
+console.log(' | ___ \\     (_) |   | |  ___(_)         ');
+console.log(' | |_/ /_   _ _| | __| | |_   _ _ __ ___ ');
+console.log(' | ___ \\ | | | | |/ _` |  _| | | \'__/ _ \\');
+console.log(' | |_/ / |_| | | | (_| | |   | | | |  __/');
+console.log(' \\____/ \\__,_|_|_|\\__,_\\_|   |_|_|  \\___|');
+console.log('');
 
 var http = require('https');
 var fs =require('fs');
@@ -10,146 +15,23 @@ var ncp = require('ncp').ncp;
 var path = require ("path");
 ncp.limit = 32;
 
+var args = process.argv.slice(2);
 
-function rmdir(dir) {
-    var list = fs.readdirSync(dir);
-    for(var i = 0; i < list.length; i++) {
-        var filename = path.join(dir, list[i]);
-        var stat = fs.statSync(filename);
-
-        if(filename == "." || filename == "..") {
-            // pass these files
-        } else if(stat.isDirectory()) {
-            // rmdir recursively
-            rmdir(filename);
-        } else {
-            // rm fiilename
-            fs.unlinkSync(filename);
-        }
-    }
-    //console.log('delete folder',dir);
-    try{
-        fs.rmdirSync(dir)
-    }
-    catch(e){
-
-    }
-};
-
-function downloadRepo(repoName,url) {
-    if(!url)
-        url="https://github.com/BuildFire/" + repoName + "/archive/master.zip";
-    var localZipPath= "_" + repoName + ".zip";
-
-    var file = fs.createWriteStream(localZipPath);
-    var request = http.get(url, function(response) {
-        if(response.statusCode == 404){
-            console.error('invalid repo');
-            return;
-        }
-        else if([301,302].indexOf(response.statusCode) > -1){
-            console.warn('file has been redirected');
-            downloadRepo(repoName, response.headers.location);
-            return;
-        }
-
-        console.log('begin downloading zip file...');
-        response.pipe(file);
-        file.on('finish',function(){
-            console.log('downloaded zip.');
-            file.close(function(){
-                console.log('unzipping...');
-
-                var zip = new AdmZip(localZipPath);
-                zip.extractAllTo("./" );
-                console.log('delete zip file.');
-                fs.unlink(localZipPath);
-                console.log('move files to root...');
-                ncp('./' + repoName + '-master', './', function (err) {
-                    if (err) console.error(err);
-                    console.log('clean up...');
-                    rmdir('./' + repoName + '-master');
-                });
-            });
-
-
-        })
-    }).on('error', function(err) { // Handle errors
-        console.error(err);
-    });
-};
-
-/// target : url or appid
-function snapshots(target){
-    var options = {
-        mode:0
-        ,delay: 10000
-        ,resolutions:[{
-            filename: 'images/iPhone4.png'
-            ,width: 640 / 2
-            ,height:960 / 2
-        },
-            {
-                filename: 'images/iPhone5.png'
-                ,width: 640 /2
-                ,height:1136 /2
-            },
-            {
-                filename: 'images/iPhone6.png'
-                ,width: 750 /2
-                ,height:1334 /2
-            },
-            {
-                filename: 'images/iPhone6Plus.png'
-                ,width: 1242 / 2
-                ,height:2208 / 2
-            },
-            {
-                filename: 'images/iPad.png'
-                ,width: 1536 /2
-                ,height:2048 /2
-            },{
-                filename: 'images/iPhonePro.png'
-                ,width: 2048 / 2
-                ,height:2732 /2
-            }]
-    };
-
-    if (target.indexOf('http') != 0 )
-        options.appId=target;
-    else
-        options.url = target;
-
-    var s = require('./tools/screenshot.js');
-    s.capture(options,function(err,restults){
-        console.log('RESULTS ', restults.length);
-    });
-
+switch (args[0]) {
+    case 'create':
+        return require('./cmd/create')(args);
+    case 'plugin':
+        return require('./cmd/plugin')(args);
+    case 'snapshots':
+        return require('./cmd/snapshots')(args);
+    case 'init':
+        return require('./cmd/init')(args);
+    case 'run':
+        return require('./cmd/run')(args);
+    case 'build':
+        return require('./cmd/build')(args);
+    case 'update':
+        return require('./cmd/update')(args);
+    default:
+        return require('./cmd/default')(args);
 }
-/* args
-node.exe
-path
-[command]
- */
-if(process.argv.length < 3 || ['-help','help','?','/?'].indexOf(process.argv[2].toLowerCase()) >= 0 ){
-    console.log('==================================================');
-    console.log('arguments:');
-    console.log('* create: this will download the latest BuildFire SDK in the current folder');
-    console.log('* update: this will download the latest BuildFire SDK and update the current folder');
-    console.log('* plugin [plugin name]: this will download the latest version of the indicated plugin in the current folder');
-    console.log('* snapshots [appId | url]: this will take pictures of the app home page or url requested at multiple resolutions');
-    console.log('// many plugins are open source (MIT) feel free to Fork them on github http://github.com/buildfire');
-}
-else if(["create","update"].indexOf( process.argv[2].toLowerCase() ) >=0 )
-    downloadRepo('sdk');
-else if(["snapshots","snapshot"].indexOf( process.argv[2].toLowerCase() ) >=0 )
-    snapshots(process.argv[3]);
-else if(process.argv[2].toLowerCase() =="plugin"  ) {
-    if(process.argv.length < 4)
-        console.error('* you forgot to indicate which plugin');
-    else
-        downloadRepo(process.argv[3]);
-}
-else
-    console.error('unknown command');
-
