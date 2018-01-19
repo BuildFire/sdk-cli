@@ -19,13 +19,19 @@ var args = process.argv.slice(2);
 
 switch (args[0]) {
     case 'create':
+    case 'init':
         return require('./cmd/create')(args);
     case 'plugin':
-        return require('./cmd/plugin')(args);
+        if (args[1] === 'add' || args[1] === 'download' || args[1] === 'clone') {
+            return require('./cmd/plugin')(args);
+        } else if (args[1] === 'init' || args[1] === 'create') {
+            return require('./cmd/init')(args);
+        } else {
+            args[2] = args[1];
+            return require('./cmd/plugin')(args);
+        }
     case 'snapshots':
         return require('./cmd/snapshots')(args);
-    case 'init':
-        return require('./cmd/init')(args);
     case 'run':
         return require('./cmd/run')(args);
     case 'build':

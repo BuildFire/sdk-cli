@@ -12,25 +12,25 @@ function plugin(args) {
     return console.log('\x1b[31mError: Please run this command inside the SDK\'s folder');
   }
 
-  if (!args[1]) {
-    return console.log('\x1b[31mUsage: $ buildfire plugin <pluginName>');
+  if (!args[2]) {
+    return console.log('\x1b[31mUsage: $ buildfire plugin <command>');
   }
 
-  var targetPath = path.join(cwd, 'plugins', args[1]);
+  var targetPath = path.join(cwd, 'plugins', args[2]);
 
   if (folderExists(targetPath)) {
     return console.log('\x1b[31mError: Plugin is already inside plugins folder');
   }
 
-  console.log('  \x1b[32mDownloading plugin ' + args[1] + '\x1b[0m');
+  console.log('  \x1b[32mDownloading plugin ' + args[2] + '\x1b[0m');
 
-  git.Clone('https://github.com/BuildFire/' + args[1] + '.git', targetPath)
+  git.Clone('https://github.com/BuildFire/' + args[2] + '.git', targetPath)
   .then(function() {
     rmDir(path.join(targetPath, '.git'));
 
     console.log('');
     console.log('  \x1b[34mNext steps:');
-    console.log('  \x1b[1m\x1b[37mcd plugins/' + args[1]);
+    console.log('  \x1b[1m\x1b[37mcd plugins/' + args[2]);
   }).catch(function(err) {
     return console.log('  \x1b[31mError: Invalid plugin name or no permissions');
   })
