@@ -5,7 +5,7 @@
 
 This will install the `buildfire' command gloabally
 
-#### The BuildFire SD is a framework that allows developers to develop Plugins on the BuildFire Platform to read more about this please visit us on github http://github.com/buildfire/sdk
+#### The BuildFire SDK is a framework that allows developers to develop Plugins on the BuildFire Platform to read more about this please visit us on github http://github.com/buildfire/sdk
 
 ## Usage
 `buildfire <command>`
