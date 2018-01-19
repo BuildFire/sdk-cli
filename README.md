@@ -1,7 +1,7 @@
 # BuildFire SDK CLI ![](https://api.travis-ci.org/BuildFire/sdk-cli.svg)
 **This Command Line Interface** is meant for use with npm to maintain the BuildFire SDK
 
-`npm install buildfire-sdk -g`
+`npm install buildfire-cli -g`
 
 This will install the `buildfire' command gloabally
 

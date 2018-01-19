@@ -24,6 +24,7 @@ function update(args) {
   git.Clone('https://github.com/BuildFire/sdk.git', targetPath)
   .then(function() {
     rmDir(path.join(targetPath, 'plugins'))
+    rmDir(path.join(targetPath, '.git'))
     fse.copySync(targetPath, cwd);
     rmDir(targetPath);
 

@@ -1,5 +1,5 @@
 {
-  "name": "buildfire-sdk",
+  "name": "buildfire-cli",
   "version": "0.0.13",
   "description": "Software Development Kit for developing plugins for the BuildFire mobile app building platform",
   "repository": {
