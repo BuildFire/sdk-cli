@@ -1,4 +1,4 @@
-var git = require('nodegit');
+var git = require('simple-git/promise')();
 var fse = require('fs-extra');
 var path = require('path');
 var isSdkDirectory = require('../tools/isSdkDirectory');
@@ -21,7 +21,7 @@ function update(args) {
   console.log('  \x1b[32mUpdating SDK');
 
 
-  git.Clone('https://github.com/BuildFire/sdk.git', targetPath)
+  git.clone('https://github.com/BuildFire/sdk.git', targetPath)
   .then(function() {
     rmDir(path.join(targetPath, 'plugins'))
     rmDir(path.join(targetPath, '.git'))
