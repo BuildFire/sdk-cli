@@ -17,7 +17,8 @@
     "ncp": "2.0.*",
     "nodegit": "^0.20.2",
     "phantom": "1.0.0",
-    "phantomjs": "2.1.1"
+    "phantomjs": "2.1.1",
+    "simple-git": "^1.89.0"
   },
   "bin": {
     "buildfire": "./bin.js"

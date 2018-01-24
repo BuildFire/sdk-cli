@@ -1,11 +1,11 @@
 var path = require('path');
-var git = require('nodegit');
-var isSdkDirectory = require('../tools/isSdkDirectory');
-var folderExists = require('../tools/folderExists');
-var rmDir = require('../tools/rmDir');
+var git = require('simple-git/promise')();
+var isSdkDirectory = require('../../tools/isSdkDirectory');
+var folderExists = require('../../tools/folderExists');
+var rmDir = require('../../tools/rmDir');
 
 
-function plugin(args) {
+function clonePlugin(args) {
   var cwd = process.cwd();
 
   if (!isSdkDirectory()) {
@@ -13,7 +13,7 @@ function plugin(args) {
   }
 
   if (!args[2]) {
-    return console.log('\x1b[31mUsage: $ buildfire plugin <command>');
+    return console.log('\x1b[31mUsage: $ buildfire plugin add <command>');
   }
 
   var targetPath = path.join(cwd, 'plugins', args[2]);
@@ -24,10 +24,8 @@ function plugin(args) {
 
   console.log('  \x1b[32mDownloading plugin ' + args[2] + '\x1b[0m');
 
-  git.Clone('https://github.com/BuildFire/' + args[2] + '.git', targetPath)
+  git.clone('https://github.com/BuildFire/' + args[2] + '.git', targetPath)
   .then(function() {
-    rmDir(path.join(targetPath, '.git'));
-
     console.log('');
     console.log('  \x1b[34mNext steps:');
     console.log('  \x1b[1m\x1b[37mcd plugins/' + args[2]);
@@ -36,4 +34,4 @@ function plugin(args) {
   })
 }
 
-module.exports = plugin;
+module.exports = clonePlugin;

@@ -20,15 +20,15 @@ var args = process.argv.slice(2);
 switch (args[0]) {
     case 'create':
     case 'init':
-        return require('./cmd/create')(args);
+        return require('./cmd/init')(args);
     case 'plugin':
         if (args[1] === 'add' || args[1] === 'download' || args[1] === 'clone') {
-            return require('./cmd/plugin')(args);
+            return require('./cmd/plugin/clone')(args);
         } else if (args[1] === 'init' || args[1] === 'create') {
-            return require('./cmd/init')(args);
+            return require('./cmd/plugin/init')(args);
         } else {
             args[2] = args[1];
-            return require('./cmd/plugin')(args);
+            return require('./cmd/plugin/clone')(args);
         }
     case 'snapshots':
         return require('./cmd/snapshots')(args);
