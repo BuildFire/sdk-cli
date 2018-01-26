@@ -6,6 +6,9 @@
     "type": "git",
     "url": "https://github.com/BuildFire/sdk-cli.git"
   },
+  "scripts": {
+    "preinstall": "npm i -g http-server"
+  },
   "bugs": {
     "url": "https://github.com/buildfire/sdk/issues"
   },
