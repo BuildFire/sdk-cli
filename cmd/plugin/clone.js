@@ -13,7 +13,7 @@ function clonePlugin(args) {
   }
 
   if (!args[2]) {
-    return console.log('\x1b[31mUsage: $ buildfire plugin add <command>');
+    return console.log('\x1b[31mUsage: $ buildfire plugin clone <command>');
   }
 
   var targetPath = path.join(cwd, 'plugins', args[2]);
@@ -24,7 +24,7 @@ function clonePlugin(args) {
 
   console.log('  \x1b[32mDownloading plugin ' + args[2] + '\x1b[0m');
 
-  git.clone('https://github.com/BuildFire/' + args[2] + '.git', targetPath)
+  git.clone('https://github.com/BuildFire/' + args[2] + 'PluginTemplate.git', targetPath)
   .then(function() {
     console.log('');
     console.log('  \x1b[34mNext steps:');
