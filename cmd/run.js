@@ -1,7 +1,11 @@
 var exec = require('child_process').exec;
+var isSdkDirectory = require('../tools/isSdkDirectory');
 
 function run(args) {
-
+    if (!isSdkDirectory()) {
+        return console.log('\x1b[31mError: Please run this command inside the SDK\'s folder');
+    }
+    
     var isWin = /^win/.test(process.platform),
         cmd = 'http-server',
         cmd2 = (isWin) ? 'start' : 'open';
