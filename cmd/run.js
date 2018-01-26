@@ -5,11 +5,12 @@ function run(args) {
     if (!isSdkDirectory()) {
         return console.log('\x1b[31mError: Please run this command inside the SDK\'s folder');
     }
-    
+
     var isWin = /^win/.test(process.platform),
-        cmd = 'http-server',
+        port = (args[1]) ? args[1] : '8080',
+        cmd = 'http-server -p' + port,
         cmd2 = (isWin) ? 'start' : 'open';
-        cmd2 = cmd2 + ' http://localhost:8080/pluginTester/index.html';
+        cmd2 = cmd2 + ' http://localhost:' + port + '/pluginTester/index.html';
 
     //Note: callback is only run on error
     exec(cmd, function(error, stdout, stderr) {
@@ -21,7 +22,7 @@ function run(args) {
         }
     });
 
-    console.log('Running plugin tester');
+    console.log('Running plugin tester on port ' + port);
 
     exec(cmd2, function(error, stdout, stderr) {
         if(error){
