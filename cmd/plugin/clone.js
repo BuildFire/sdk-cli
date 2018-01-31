@@ -24,7 +24,7 @@ function clonePlugin(args) {
 
   console.log('  \x1b[32mDownloading plugin ' + args[2] + '\x1b[0m');
 
-  git.clone('https://github.com/BuildFire/' + args[2] + 'PluginTemplate.git', targetPath)
+  git.clone('https://github.com/BuildFire/' + args[2], targetPath)
   .then(function() {
     console.log('');
     console.log('  \x1b[34mNext steps:');
