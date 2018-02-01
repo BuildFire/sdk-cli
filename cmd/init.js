@@ -24,7 +24,7 @@ function initSdk(args) {
       console.log('');
       console.log('  \x1b[34mNext steps:');
       console.log('  \x1b[1m\x1b[37mcd BuildFireSDK');
-      console.log('  \x1b[1m\x1b[37mbuildfire plugin init <pluginTemplate> <pluginName>');
+      console.log('  \x1b[1m\x1b[37mbuildfire plugin init <pluginName> <pluginTemplate>');
     });
 }
 
