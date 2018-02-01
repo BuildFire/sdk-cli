@@ -14,5 +14,4 @@ This will install the `buildfire' command gloabally
 * `init` Download the latest SDK to a folder called "BuildFireSDK".
 * `plugin clone <pluginName>` Clone the plugin into the plugins/ folder. See a full list of open source plugins here http://github.com/buildfire
 * `plugin init <pluginName> <template>` Clone the plugin into the plugins/ folder.
-* `snapshots <appId|appUrl>` This will take pictures of the app home page or url requested at multiple resolutions
 * `update` Download the latest SDK and update the current SDK folder
