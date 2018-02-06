@@ -7,7 +7,7 @@ function run(args) {
     }
 
     var isWin = /^win/.test(process.platform),
-        port = (args[1]) ? args[1] : '8080',
+        port = (args[1]) ? args[1] : '8000',
         cmd = 'http-server -p' + port,
         cmd2 = (isWin) ? 'start' : 'open';
         cmd2 = cmd2 + ' http://localhost:' + port + '/pluginTester/index.html';
