@@ -7,7 +7,7 @@ function defaultCmd() {
   console.log('Commands:');
   console.log('');
   console.log('  \x1b[34minit\x1b[90m ...................................\x1b[37m Creates a folder \'BuildFireSDK\' and installs the SDK to it.');
-  console.log('  \x1b[34mrun <port>\x1b[90m .............................\x1b[37m Start the plugin tester. Defaults to port 8000.');
+  console.log('  \x1b[34mrun\x1b[90m ....................................\x1b[37m Start the plugin tester.');
   console.log('  \x1b[34mplugin <command>');
   console.log('  \x1b[34m       init <pluginName> <template>\x1b[90m ....\x1b[37m Initialize a new plugin (templates: webpack, react).');
   console.log('  \x1b[34m       clone <pluginName>\x1b[90m ..............\x1b[37m Clone the plugin into the plugins/ folder.');

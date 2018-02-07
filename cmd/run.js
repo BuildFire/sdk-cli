@@ -1,3 +1,5 @@
+var net = require('net');
+var express = require('express');
 var exec = require('child_process').exec;
 var isSdkDirectory = require('../tools/isSdkDirectory');
 
@@ -6,31 +8,47 @@ function run(args) {
         return console.log('\x1b[31mError: Please run this command inside the SDK\'s folder');
     }
 
-    var isWin = /^win/.test(process.platform),
-        port = (args[1]) ? args[1] : '8000',
-        cmd = 'http-server -p' + port,
-        cmd2 = (isWin) ? 'start' : 'open';
-        cmd2 = cmd2 + ' http://localhost:' + port + '/pluginTester/index.html';
-
-    //Note: callback is only run on error
-    exec(cmd, function(error, stdout, stderr) {
-        if(error){
-            console.log('error', error);
-            console.log('stdout', stdout);
-            console.log('stderr', stderr);
-            return;
-        }
+    getAvailablePort(3030, function(port) {
+        var app = express();
+        app.use(express.static(process.cwd()));
+        app.listen(port, function() {
+            openBrowser(port);
+        });
     });
 
-    console.log('Running plugin tester on port ' + port);
+    function openBrowser(port) {
+        console.log('Server running on [::]:' +  port);
 
-    exec(cmd2, function(error, stdout, stderr) {
-        if(error){
-            console.log('error', error);
-            console.log('stdout', stdout);
-            console.log('stderr', stderr);
+        var isWin = /^win/.test(process.platform),
+            cmd2 = (isWin) ? 'start' : 'open';
+            cmd2 = cmd2 + ' http://localhost:' + port + '/pluginTester/index.html';
+
+        exec(cmd2, function(error, stdout, stderr) {
+            if (error) {
+                console.log('error', error);
+                console.log('stdout', stdout);
+                console.log('stderr', stderr);
+            }
+        });
+    }
+
+    function getAvailablePort (startingAt, cb) {
+        function getNextAvailablePort (currentPort, cb) {
+            const server = net.createServer();
+            server.listen(currentPort, function() {
+                server.once('close', function() {
+                    cb(currentPort);
+                })
+                server.close();
+            })
+            server.on('error', function() {
+                getNextAvailablePort(++currentPort, cb);
+            });
         }
-    });
+
+        getNextAvailablePort(startingAt, cb);
+    }
+
 }
 
 module.exports = run;
