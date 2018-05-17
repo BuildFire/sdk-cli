@@ -8,7 +8,10 @@ function run(args) {
         return console.log('\x1b[31mError: Please run this command inside the SDK\'s folder');
     }
 
-    getAvailablePort(3030, function(port) {
+    var defaultPort = 3030;
+    if(Array.isArray(args) && args.length > 1 ) defaultPort= parseInt(args[1]);
+
+    getAvailablePort(defaultPort, function(port) {
         var app = express();
         app.use(express.static(process.cwd()));
         app.listen(port, function() {
@@ -38,9 +41,9 @@ function run(args) {
             server.listen(currentPort, function() {
                 server.once('close', function() {
                     cb(currentPort);
-                })
+                });
                 server.close();
-            })
+            });
             server.on('error', function() {
                 getNextAvailablePort(++currentPort, cb);
             });
