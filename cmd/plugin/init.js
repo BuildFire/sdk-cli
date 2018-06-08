@@ -8,8 +8,13 @@ var rmDir = require('../../tools/rmDir');
 function initPlugin(args) {
     var cwd = process.cwd();
 
-    if (!args[2] || !args[3]) {
-      return console.log('\x1b[31mError: Please provide a plugin name and plugin template');
+    if (!args[2]) {
+      return console.log('\x1b[31mError: Please provide a plugin name');
+    }
+
+    // Default to default template if none is specified
+    if (!args[3]) {
+      args[3] = 'default';
     }
 
     var targetPath = path.join(cwd, 'plugins', args[2]);
@@ -22,9 +27,9 @@ function initPlugin(args) {
       return console.log('\x1b[31mError: Plugin folder with that name already exists');
     }
 
-    console.log('\x1b[32mCreating Plugin ' + args[2] + '\x1b[0m');
+    console.log('\x1b[32mCreating Plugin ' + args[2] + ' with tempalte ' + args[3] + '\x1b[0m');
 
-    git.clone('https://github.com/BuildFire/plugin-template-' + args[3] + '.git', targetPath)
+    git.clone('https://github.com/BuildFire/' + args[3] + 'PluginTemplate.git', targetPath)
     .then(function() {
       rmDir(path.join(targetPath, '.git'));
 
