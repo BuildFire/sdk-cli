@@ -36,8 +36,10 @@ function initPlugin(args) {
       console.log('');
       console.log('  \x1b[34mNext steps:');
       console.log('  \x1b[1m\x1b[37mcd plugins/' + args[2]);
-      console.log('  \x1b[1m\x1b[37mnpm install');
-      console.log('  \x1b[1m\x1b[37mnpm start');
+      if (args[3] !== 'default') {
+        console.log('  \x1b[1m\x1b[37mnpm install');
+        console.log('  \x1b[1m\x1b[37mnpm start');
+      }
     }).catch(err => console.error(err));
 }
 
