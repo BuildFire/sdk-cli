@@ -1,6 +1,6 @@
 {
   "name": "buildfire-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Software Development Kit for developing plugins for the BuildFire mobile app building platform",
   "repository": {
     "type": "git",
