@@ -10,12 +10,15 @@ function run(args) {
 
     var defaultPort = 3030;
     if(Array.isArray(args) && args.length > 1) {
-        if (parseInt(args[1]) === NaN) {
-            defaultPort= parseInt(args[1]);
+        if (isNaN(parseInt(args[1]))) {
+            console.error('\x1b[31m Error: Please provide a proper port number to run SDK');
+            return;
         } else {
-            console.error('Please provide a proper port number, using a random one');
+            defaultPort= parseInt(args[1]);
         }
     }
+
+    console.log({ defaultPort });
 
     getAvailablePort(defaultPort, function(port) {
         var app = express();
