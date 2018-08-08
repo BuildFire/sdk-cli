@@ -11,7 +11,7 @@ function run(args) {
     var defaultPort = 3030;
     if(Array.isArray(args) && args.length > 1) {
         if (isNaN(parseInt(args[1]))) {
-            console.error('\x1b[31m Error: Unknown argument ' +  args[1] + ', this command is to run SDK.');
+            console.error('\x1b[31m Error: Please specify a valid port number. (Note: This parameter is optional.)');
             return;
         } else {
             defaultPort= parseInt(args[1]);
