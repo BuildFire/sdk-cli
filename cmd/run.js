@@ -9,7 +9,14 @@ function run(args) {
     }
 
     var defaultPort = 3030;
-    if(Array.isArray(args) && args.length > 1 ) defaultPort= parseInt(args[1]);
+    if(Array.isArray(args) && args.length > 1) {
+        if (isNaN(parseInt(args[1]))) {
+            console.error('\x1b[31m Error: Unknown argument ' +  args[1] + ', this command is to run SDK.');
+            return;
+        } else {
+            defaultPort= parseInt(args[1]);
+        }
+    }
 
     getAvailablePort(defaultPort, function(port) {
         var app = express();
