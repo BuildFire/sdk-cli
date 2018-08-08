@@ -5,8 +5,10 @@ function isSdkDirectory() {
 
   var data = fs.readdirSync(cwd);
 
+  data = data.map(item => item.toLowerCase());
+
   if (data.indexOf('scripts') > -1 &&
-      (data.indexOf('PluginTester') > -1 || data.indexOf('pluginTester') > -1) &&
+      data.indexOf('plugintester') &&
       data.indexOf('plugins') > -1 &&
       data.indexOf('package.json') > -1) {
     return true;
