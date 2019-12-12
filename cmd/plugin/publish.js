@@ -1,34 +1,34 @@
 #! /usr/bin/env node
 
-var http = require('https');
-var path = require("path");
-var fs = require('fs');
-var ncp = require('ncp').ncp;
-var archiver = require('archiver');
-var request = require('request');
-var prompt = require('prompt');
-var loginTrials = 0;
-var apiProxy = null;
+let http = require('https');
+let path = require("path");
+let fs = require('fs');
+let ncp = require('ncp').ncp;
+let archiver = require('archiver');
+let request = require('request');
+let prompt = require('prompt');
+let loginTrials = 0;
+let apiProxy = null;
 ncp.limit = 32;
 
 function publishPlugin(args) {
 
 
-    var baseApiUrl = 'https://developer.buildfire.com';
+    let baseApiUrl = 'https://developer.buildfire.com';
 
-    function uploadPlugin(pluginPath, isUpdate, isUat) {
+    function uploadPlugin(pluginPath, options) {
 
-        if(isUat) {
-            baseApiUrl = 'http://uat-app.buildfire.com:89';
+        if(options && options.customDevServerUrl) {
+            baseApiUrl = options.customDevServerUrl;
         }
 
         console.log("path:" + pluginPath);
-        var pluginName = null;
+        let pluginName = null;
         try {
-            var absolutePath = path.resolve(pluginPath + '/plugin.json');
-            var contents = fs.readFileSync(absolutePath);
+            let absolutePath = path.resolve(pluginPath + '/plugin.json');
+            let contents = fs.readFileSync(absolutePath);
             // Define to JSON type
-            var pluginJSON = JSON.parse(contents);
+            let pluginJSON = JSON.parse(contents);
 
             pluginName = pluginJSON.pluginName;
         }
@@ -40,12 +40,12 @@ function publishPlugin(args) {
         console.log('\x1b[43m', 'plugin "' +  pluginName + '" is being prepared for uploading ...', '\x1b[0m');
 
 
-        var zipPath = 'plugin-' + new Date().getTime() + '.zip';
-        var archive = archiver('zip', {
+        let zipPath = 'plugin-' + new Date().getTime() + '.zip';
+        let archive = archiver('zip', {
             zlib: {level: 9} // Sets the compression level.
         });
 
-        var output = fs.createWriteStream(zipPath);
+        let output = fs.createWriteStream(zipPath);
         archive.pipe(output);
         archive.directory(pluginPath, false);
         output.on('close', function () {
@@ -54,19 +54,28 @@ function publishPlugin(args) {
                     return console.log('\x1b[41m', 'error authenticating user', '\x1b[0m');
                 }
                 console.log('uploading plugin ...');
-                if(!isUpdate) {
-                    publishUserPlugin(pluginName, zipPath, user, function(err, result) {
+                if(!options || !options.isUpdate) {
+                    publishUserPlugin(pluginName, zipPath, user, options, function(err, result) {
                         if(err) {
                             console.log('\x1b[41m', 'failed publishing plugin; ' + err, '\x1b[0m');
                         }
-                        fs.unlink(zipPath);
+                        setTimeout(function() {
+                            fs.unlink(zipPath, (err) => {
+                                if (err) throw err;
+                            });
+                        }, 0);
+
                     });
                 } else {
-                    updateUserPlugin(pluginName, zipPath, user, function(err, result) {
+                    updateUserPlugin(pluginName, zipPath, user, options, function(err, result) {
                         if(err) {
                             console.log('\x1b[41m', 'failed updating plugin; ' + err, '\x1b[0m');
                         }
-                        fs.unlink(zipPath);
+                        setTimeout(function() {
+                            fs.unlink(zipPath, (err) => {
+                                if (err) throw err;
+                            });
+                        }, 0);
                     });
                 }
             });
@@ -121,7 +130,7 @@ function publishPlugin(args) {
         });
     }
 
-    function publishUserPlugin(pluginName, zipPath, user, callback) {
+    function publishUserPlugin(pluginName, zipPath, user, options, callback) {
         request({
                 method: 'POST',
                 preambleCRLF: true,
@@ -143,9 +152,9 @@ function publishPlugin(args) {
                 if (error) {
                     return console.error('upload failed:', error);
                 }
-                if (response.statusCode >= 400 || response.statusCode == 0) {
+                if (response.statusCode >= 400 || response.statusCode === 0) {
 
-                    var jsonResult = undefined;
+                    let jsonResult = undefined;
                     try {
                         jsonResult = JSON.parse(body);
                     }
@@ -167,13 +176,16 @@ function publishPlugin(args) {
                                 }
                             }, function (err, result) {
                                 if (err) {
+                                    callback(err, result);
                                     return; // do not update
                                 }
                                 if (result.forceUpdate) {
                                     console.log('updating plugin ...');
-                                    updateUserPlugin(pluginName, zipPath, user, function(err, result) {
-                                        callback(err, result)
+                                    updateUserPlugin(pluginName, zipPath, user, options, function(err, result) {
+                                        callback(err, result);
                                     });
+                                } else {
+                                    callback(err, result);
                                 }
                             });
                         } else {
@@ -191,55 +203,85 @@ function publishPlugin(args) {
             });
     }
 
-    function updateUserPlugin(pluginName, zipPath, user, callback) {
-
+    function updateUserPlugin(pluginName, zipPath, user, options, callback) {
         getPluginType(pluginName, user, function(err, pluginType) {
             if(err) {
                 callback(err);
                 return;
             }
-            request({
-                    method: 'POST',
-                    preambleCRLF: true,
-                    postambleCRLF: true,
-                    proxy: apiProxy,
-                    uri: baseApiUrl + '/api/pluginTypes/update',
-                    headers: {
-                        'Origin': baseApiUrl,
-                        'Accept': 'application/json, text/plain, */*',
-                        'Accept-Encoding': 'gzip, deflate',
-                        'userToken': user.userToken,
-                        'auth': user.auth
+            let requestUpdate = function() {
+                let formData = {
+                    file: fs.createReadStream(zipPath),
+                    pluginTypeToken: pluginType.token
+                };
+                if (options && options.isQA) {
+                    formData.environmentType = "QA";
+                }
+                request({
+                        method: 'POST',
+                        preambleCRLF: true,
+                        postambleCRLF: true,
+                        proxy: apiProxy,
+                        uri: baseApiUrl + '/api/pluginTypes/update',
+                        headers: {
+                            'Origin': baseApiUrl,
+                            'Accept': 'application/json, text/plain, */*',
+                            'Accept-Encoding': 'gzip, deflate',
+                            'userToken': user.userToken,
+                            'auth': user.auth
+                        },
+                        formData: formData
                     },
-                    formData: {
-                        file: fs.createReadStream(zipPath),
-                        pluginTypeToken: pluginType.token
-                    }
-                },
-                function (error, response, body) {
-                    if (error) {
-                        return console.error('upload failed:', error);
-                    }
-                    if (response.statusCode >= 400 || response.statusCode == 0) {
+                    function (error, response, body) {
+                        if (error) {
+                            return console.error('upload failed:', error);
+                        }
+                        if (response.statusCode >= 400 || response.statusCode === 0) {
 
-                        var jsonResult = undefined;
-                        try {
-                            jsonResult = JSON.parse(body);
-                        }
-                        catch (err) {
-                        }
-                        if (jsonResult && jsonResult.message) {
-                            callback(jsonResult.message);
-                            console.log('\x1b[41m', 'failed: ' + jsonResult.message, '\x1b[0m');
+                            let jsonResult = undefined;
+                            try {
+                                jsonResult = JSON.parse(body);
+                            }
+                            catch (err) {
+                            }
+                            if (jsonResult && jsonResult.message) {
+                                callback(jsonResult.message);
+                                console.log('\x1b[41m', 'failed: ' + jsonResult.message, '\x1b[0m');
+                            } else {
+                                callback('an error has occurred');
+                                console.log('\x1b[41m', 'an error has occurred: ', body, '\x1b[0m');
+                            }
                         } else {
-                            callback('an error has occurred');
-                            console.log('\x1b[41m', 'an error has occurred: ', body, '\x1b[0m');
+                            callback(null, 'uploaded successfully');
+                            console.log('\x1b[45m', 'successfully updated plugin', '\x1b[0m');
                         }
-                    } else {
-                        callback(null, 'uploaded successfully');
-                        console.log('\x1b[45m', 'successfully updated plugin', '\x1b[0m');
+                    });
+            };
+            if (options && options.isQA == null) {
+                prompt.start();
+                prompt.get({
+                    properties: {
+                        env: {
+                            description: "environment [QA/prod]",
+                            required: true,
+                            default: "QA",
+                            message: "select [QA/prod] or default to QA. you can set --prod or --QA to prevent this prompt",
+                            conform: function (value) {
+                                return value === 'QA' || value === 'prod'
+                            },
+                        },
                     }
+                }, function (err, result) {
+                    if (err) {
+                        callback(err, result);
+                        return; // do not update
+                    }
+                    options.isQA = result.env === 'QA';
+                    requestUpdate();
                 });
+            } else {
+                requestUpdate();
+            }
         });
     }
 
@@ -248,7 +290,7 @@ function publishPlugin(args) {
         request({
                 method: 'GET',
                 proxy: apiProxy,
-                uri: baseApiUrl + '/api/pluginTypes/search?pageIndex=1&pageSize=100',
+                uri: baseApiUrl + '/api/pluginTypes/search?pageIndex=1&pageSize=200',
                 gzip: true,
                 headers: {
                     'Origin': baseApiUrl,
@@ -259,11 +301,11 @@ function publishPlugin(args) {
                 }
             },
             function (error, response, body) {
-                var jsonResult = undefined;
+                let jsonResult = undefined;
                 if (error) {
                     return console.error('upload failed:', error);
                 }
-                if (response.statusCode >= 400 || response.statusCode == 0) {
+                if (response.statusCode >= 400 || response.statusCode === 0) {
                     try {
                         jsonResult = JSON.parse(body);
                     }
@@ -285,8 +327,8 @@ function publishPlugin(args) {
                         return;
                     }
                     if (jsonResult && jsonResult.data) {
-                        for(var index = 0; index < jsonResult.data.length; index++) {
-                            if(jsonResult.data[index] && jsonResult.data[index].name == pluginName) {
+                        for(let index = 0; index < jsonResult.data.length; index++) {
+                            if(jsonResult.data[index] && jsonResult.data[index].name === pluginName) {
                                 callback(null, jsonResult.data[index]);
                                 return;
                             }
@@ -297,7 +339,26 @@ function publishPlugin(args) {
             });
     }
 
-    uploadPlugin(args[2], args[3] === '--update' || args[4] === '--update', args[3] === '--uat' || args[4] === '--uat');
+    let hasUpdateFlag = args.indexOf('--update') > -1;
+    let hasQAFlag = args.indexOf('--qa') > -1;
+    let hasLiveFlag = args.indexOf('--live') > -1;
+    let isQA = null;
+    let customDevServerUrl = null;
+    let customDevServerFlagIndex = args.indexOf('--server');
+    if(customDevServerFlagIndex > -1 && args[customDevServerFlagIndex + 1]) {
+        customDevServerUrl = args[customDevServerFlagIndex + 1];
+    }
+    if(hasQAFlag !== hasLiveFlag) { // if both supplied ignore
+        isQA = hasQAFlag;
+    }
+
+    let options = {
+        isUpdate: hasUpdateFlag,
+        isQA: isQA,
+        customDevServerUrl: customDevServerUrl
+    };
+
+    uploadPlugin(args[2], options);
 }
 
 
