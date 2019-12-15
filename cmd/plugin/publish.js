@@ -3,8 +3,10 @@
 let http = require('https');
 let path = require("path");
 let fs = require('fs');
+var fse = require('fs-extra');
 let ncp = require('ncp').ncp;
 let archiver = require('archiver');
+let AdmZip = require('adm-zip');
 let request = require('request');
 let prompt = require('prompt');
 let loginTrials = 0;
@@ -22,65 +24,88 @@ function publishPlugin(args) {
             baseApiUrl = options.customDevServerUrl;
         }
 
-        console.log("path:" + pluginPath);
-        let pluginName = null;
-        try {
-            let absolutePath = path.resolve(pluginPath + '/plugin.json');
-            let contents = fs.readFileSync(absolutePath);
-            // Define to JSON type
-            let pluginJSON = JSON.parse(contents);
+        function processFolder(processCallback) {
+            let pluginName = null;
+            try {
+                let absolutePath = path.resolve(pluginPath + '/plugin.json');
+                let contents = fs.readFileSync(absolutePath);
+                // Define to JSON type
+                let pluginJSON = JSON.parse(contents);
 
-            pluginName = pluginJSON.pluginName;
-        }
-        catch (err) {
-            console.log('\x1b[41m', 'error fetching plugin.json; ' + err, '\x1b[0m');
-            return;
-        }
+                pluginName = pluginJSON.pluginName;
+            }
+            catch (err) {
+                console.log('\x1b[41m', 'error fetching plugin.json; ' + err, '\x1b[0m');
+                return;
+            }
 
-        console.log('\x1b[43m', 'plugin "' +  pluginName + '" is being prepared for uploading ...', '\x1b[0m');
+            console.log('\x1b[43m', 'plugin "' +  pluginName + '" is being prepared for uploading ...', '\x1b[0m');
 
 
-        let zipPath = 'plugin-' + new Date().getTime() + '.zip';
-        let archive = archiver('zip', {
-            zlib: {level: 9} // Sets the compression level.
-        });
-
-        let output = fs.createWriteStream(zipPath);
-        archive.pipe(output);
-        archive.directory(pluginPath, false);
-        output.on('close', function () {
-            login(function (err, user) {
-                if (err) {
-                    return console.log('\x1b[41m', 'error authenticating user', '\x1b[0m');
-                }
-                console.log('uploading plugin ...');
-                if(!options || !options.isUpdate) {
-                    publishUserPlugin(pluginName, zipPath, user, options, function(err, result) {
-                        if(err) {
-                            console.log('\x1b[41m', 'failed publishing plugin; ' + err, '\x1b[0m');
-                        }
-                        setTimeout(function() {
-                            fs.unlink(zipPath, (err) => {
-                                if (err) throw err;
-                            });
-                        }, 0);
-
-                    });
-                } else {
-                    updateUserPlugin(pluginName, zipPath, user, options, function(err, result) {
-                        if(err) {
-                            console.log('\x1b[41m', 'failed updating plugin; ' + err, '\x1b[0m');
-                        }
-                        setTimeout(function() {
-                            fs.unlink(zipPath, (err) => {
-                                if (err) throw err;
-                            });
-                        }, 0);
-                    });
-                }
+            let zipPath = 'plugin-' + new Date().getTime() + '.zip';
+            let archive = archiver('zip', {
+                zlib: {level: 9} // Sets the compression level.
             });
-        });
-        archive.finalize();
+
+            let output = fs.createWriteStream(zipPath);
+            archive.pipe(output);
+            archive.directory(pluginPath, false);
+            output.on('close', function () {
+                login(function (err, user) {
+                    if (err) {
+                        return console.log('\x1b[41m', 'error authenticating user', '\x1b[0m');
+                    }
+                    console.log('uploading plugin ...');
+                    if(!options || !options.isUpdate) {
+                        publishUserPlugin(pluginName, zipPath, user, options, function(err, result) {
+                            if(err) {
+                                console.log('\x1b[41m', 'failed publishing plugin; ' + err, '\x1b[0m');
+                            }
+                            setTimeout(function() {
+                                fs.unlink(zipPath, (err) => {
+                                    if (err) throw err;
+                                    if (processCallback) processCallback();
+                                });
+                            }, 0);
+
+                        });
+                    } else {
+                        updateUserPlugin(pluginName, zipPath, user, options, function(err, result) {
+                            if(err) {
+                                console.log('\x1b[41m', 'failed updating plugin; ' + err, '\x1b[0m');
+                            }
+                            setTimeout(function() {
+                                fs.unlink(zipPath, (err) => {
+                                    if (err) throw err;
+                                    if (processCallback) processCallback();
+                                });
+                            }, 0);
+                        });
+                    }
+                });
+            });
+            archive.finalize();
+        }
+
+        if(fs.existsSync(pluginPath)) {
+            let stats = fs.lstatSync(pluginPath);
+            if(stats.isFile()) {
+                // unzip
+                let zip = new AdmZip(pluginPath);
+                let unzipPath = 'plugin-' + new Date().getTime();
+                zip.extractAllTo(unzipPath, true);
+                pluginPath = unzipPath;
+                processFolder(function() {
+                    fse.removeSync(unzipPath);
+                });
+            } else if (stats.isDirectory()) {
+                processFolder();
+            } else {
+                console.log('\x1b[41m', 'unrecognized path: ' + pluginPath, '\x1b[0m');
+            }
+        } else {
+            console.log('\x1b[41m', 'unable to locate plugin at path: ' + pluginPath, '\x1b[0m');
+        }
     }
 
     function login(callback) {
