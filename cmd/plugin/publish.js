@@ -36,6 +36,7 @@ function publishPlugin(args) {
             }
             catch (err) {
                 console.log('\x1b[41m', 'error fetching plugin.json; ' + err, '\x1b[0m');
+                if (processCallback) processCallback(err);
                 return;
             }
 
@@ -53,31 +54,35 @@ function publishPlugin(args) {
             output.on('close', function () {
                 login(function (err, user) {
                     if (err) {
+                        fs.unlink(zipPath, (err) => {
+                            if (processCallback) processCallback(err);
+                            if (err) throw err;
+                        });
                         return console.log('\x1b[41m', 'error authenticating user', '\x1b[0m');
                     }
                     console.log('uploading plugin ...');
                     if(!options || !options.isUpdate) {
                         publishUserPlugin(pluginName, zipPath, user, options, function(err, result) {
-                            if(err) {
-                                console.log('\x1b[41m', 'failed publishing plugin; ' + err, '\x1b[0m');
-                            }
                             setTimeout(function() {
+                                if(err) {
+                                    console.log('\x1b[41m', 'failed publishing plugin; ' + err, '\x1b[0m');
+                                }
                                 fs.unlink(zipPath, (err) => {
-                                    if (err) throw err;
                                     if (processCallback) processCallback();
+                                    if (err) throw err;
                                 });
                             }, 0);
 
                         });
                     } else {
                         updateUserPlugin(pluginName, zipPath, user, options, function(err, result) {
-                            if(err) {
-                                console.log('\x1b[41m', 'failed updating plugin; ' + err, '\x1b[0m');
-                            }
                             setTimeout(function() {
+                                if(err) {
+                                    console.log('\x1b[41m', 'failed updating plugin; ' + err, '\x1b[0m');
+                                }
                                 fs.unlink(zipPath, (err) => {
-                                    if (err) throw err;
                                     if (processCallback) processCallback();
+                                    if (err) throw err;
                                 });
                             }, 0);
                         });
