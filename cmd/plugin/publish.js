@@ -193,7 +193,7 @@ function publishPlugin(args) {
                     }
                     if (jsonResult && jsonResult.message) {
                         if (jsonResult.code === 'checkPluginTypeUniqueness') {
-                            console.log('\x1b[41m', 'a plugin already exists with the same name', '\x1b[0m');
+                            console.log('\x1b[41m', 'a plugin already exists with the same name. you can set --update to prevent this prompt', '\x1b[0m');
                             prompt.start();
                             prompt.get({
                                 properties: {
@@ -201,7 +201,8 @@ function publishPlugin(args) {
                                         description: 'Update your exiting plugin',
                                         required: true,
                                         type: 'boolean',
-                                        default: false
+                                        default: false,
+                                        message: "please specify [true|false]",
                                     }
                                 }
                             }, function (err, result) {
@@ -292,12 +293,12 @@ function publishPlugin(args) {
                 prompt.get({
                     properties: {
                         env: {
-                            description: "environment [QA/prod]",
+                            description: "environment [QA|Live]. you can set --qa or --live to prevent this prompt",
                             required: true,
                             default: "QA",
-                            message: "select [QA/prod] or default to QA. you can set --prod or --QA to prevent this prompt",
+                            message: "select [QA|Live] or default to QA",
                             conform: function (value) {
-                                return value === 'QA' || value === 'prod'
+                                return value && (value.toUpperCase() === 'QA' || value.toUpperCase() === 'Live')
                             },
                         },
                     }
@@ -306,7 +307,7 @@ function publishPlugin(args) {
                         callback(err, result);
                         return; // do not update
                     }
-                    options.isQA = result.env === 'QA';
+                    options.isQA = result.env.toUpperCase() === 'QA';
                     requestUpdate();
                 });
             } else {
