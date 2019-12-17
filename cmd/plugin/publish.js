@@ -1,6 +1,5 @@
 #! /usr/bin/env node
 
-let http = require('https');
 let path = require("path");
 let fs = require('fs');
 var fse = require('fs-extra');
@@ -20,8 +19,13 @@ function publishPlugin(args) {
 
     function uploadPlugin(pluginPath, options) {
 
+        prompt.message = null;
+
         if(options && options.customDevServerUrl) {
             baseApiUrl = options.customDevServerUrl;
+        }
+        if (!pluginPath) {
+            pluginPath = ".";
         }
 
         function processFolder(processCallback) {
@@ -293,12 +297,12 @@ function publishPlugin(args) {
                 prompt.get({
                     properties: {
                         env: {
-                            description: "environment [QA|Live]. you can set --qa or --live to prevent this prompt",
+                            description: "environment [QA|Prod]. you can set --qa or --prod to prevent this prompt",
                             required: true,
                             default: "QA",
-                            message: "select [QA|Live] or default to QA",
+                            message: "select [QA|Prod] or default to QA",
                             conform: function (value) {
-                                return value && (value.toUpperCase() === 'QA' || value.toUpperCase() === 'Live')
+                                return value && (value.toUpperCase() === 'QA' || value.toUpperCase() === 'PROD')
                             },
                         },
                     }
@@ -372,14 +376,14 @@ function publishPlugin(args) {
 
     let hasUpdateFlag = args.indexOf('--update') > -1;
     let hasQAFlag = args.indexOf('--qa') > -1;
-    let hasLiveFlag = args.indexOf('--live') > -1;
+    let hasProdFlag = args.indexOf('--prod') > -1;
     let isQA = null;
     let customDevServerUrl = null;
     let customDevServerFlagIndex = args.indexOf('--server');
     if(customDevServerFlagIndex > -1 && args[customDevServerFlagIndex + 1]) {
         customDevServerUrl = args[customDevServerFlagIndex + 1];
     }
-    if(hasQAFlag !== hasLiveFlag) { // if both supplied ignore
+    if(hasQAFlag !== hasProdFlag) { // if both supplied ignore
         isQA = hasQAFlag;
     }
 
