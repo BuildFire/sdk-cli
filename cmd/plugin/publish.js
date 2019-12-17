@@ -321,7 +321,7 @@ function publishPlugin(args) {
     }
 
     function getPluginType(pluginName, user, callback) {
-        // TODO: replace with a dedicated api
+        // TODO: replace with a dedicated api, will cause an issue if plugins exceed page size
         request({
                 method: 'GET',
                 proxy: apiProxy,
@@ -386,6 +386,10 @@ function publishPlugin(args) {
     if(hasQAFlag !== hasProdFlag) { // if both supplied ignore
         isQA = hasQAFlag;
     }
+    let pluginName = args[2];
+    if (pluginName && pluginName.indexOf('--') === 0) {
+        pluginName = undefined;
+    }
 
     let options = {
         isUpdate: hasUpdateFlag,
@@ -393,7 +397,7 @@ function publishPlugin(args) {
         customDevServerUrl: customDevServerUrl
     };
 
-    uploadPlugin(args[2], options);
+    uploadPlugin(pluginName, options);
 }
 
 
