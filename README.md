@@ -14,9 +14,8 @@ This will install the `buildfire' command gloabally
 * `init` Download the latest SDK to a folder called "BuildFireSDK".
 * `plugin clone <pluginName>` Clone the plugin into the plugins/ folder. See a full list of open source plugins here http://github.com/buildfire
 * `plugin init <pluginName> <template>` Clone the plugin into the plugins/ folder.
-* `plugin publish <pluginPath>` Publishes the plugin through developer.buildfire.com directly.
-   The pluginPath can be either a folder or a zip file. you can specify any of the following options: 
+* `plugin publish <pluginPath>` Publishes the plugin through developer.buildfire.com directly. The pluginPath can be either a folder (current if missing) or a zip file. you can specify any of the following options: 
     * --update (forces updating the plugin)
     * --qa (specfies QA as the target environment)
-    * --live (specfies Live as the target environment)
+    * --prod (specfies Production as the target environment)
 * `update` Download the latest SDK and update the current SDK folder
