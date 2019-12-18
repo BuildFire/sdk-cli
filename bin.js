@@ -26,7 +26,9 @@ switch (args[0]) {
             return require('./cmd/plugin/clone')(args);
         } else if (args[1] === 'init' || args[1] === 'create') {
             return require('./cmd/plugin/init')(args);
-        } else {
+        } else if (args[1] === 'publish') {
+            return require('./cmd/plugin/publish')(args);
+        }  else {
             args[2] = args[1];
             return require('./cmd/plugin/clone')(args);
         }
