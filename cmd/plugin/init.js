@@ -5,8 +5,13 @@ var isSdkDirectory = require('../../tools/isSdkDirectory');
 var rmDir = require('../../tools/rmDir');
 var fs = require('fs');
 
-function isURL(str) {
+function isUrl(str) {
   var pattern = new RegExp(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/)
+  return str && pattern.test(str);
+}
+
+function isGitUrl(str) {
+  var pattern = new RegExp(/(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$/);
   return str && pattern.test(str);
 }
 
@@ -39,7 +44,7 @@ function initPlugin(args) {
 
     console.log('\x1b[32mCreating Plugin ' + args[2] + ' with template ' + args[3] + '\x1b[0m');
 
-    var gitUrl = isURL(args[3]) || isDirectory(args[3])
+    var gitUrl = isUrl(args[3]) || isGitUrl(args[3]) || isDirectory(args[3])
       ? args[3]
       : `https://github.com/BuildFire/${args[3]}PluginTemplate.git`;
     git.clone(gitUrl, targetPath)
