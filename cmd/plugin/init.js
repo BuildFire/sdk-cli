@@ -16,8 +16,12 @@ function isGitUrl(str) {
 }
 
 function isDirectory(str) {
-  var stats = fs.statSync(str);
-  return stats.isDirectory();
+  try {
+    var stats = fs.statSync(str);
+    return stats.isDirectory();
+  } catch(e) {
+    return false;
+  }
 }
 
 function initPlugin(args) {
