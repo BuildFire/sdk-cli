@@ -39,8 +39,8 @@ function initPlugin(args) {
 
     console.log('\x1b[32mCreating Plugin ' + args[2] + ' with template ' + args[3] + '\x1b[0m');
 
-    var gitUrl = isURL(args[3]) || isDirectory(args[3]) 
-      ? args[3] 
+    var gitUrl = isURL(args[3]) || isDirectory(args[3])
+      ? args[3]
       : `https://github.com/BuildFire/${args[3]}PluginTemplate.git`;
     git.clone(gitUrl, targetPath)
     .then(function() {
