@@ -37,7 +37,7 @@ function initPlugin(args) {
       return console.log('\x1b[31mError: Plugin folder with that name already exists');
     }
 
-    console.log('\x1b[32mCreating Plugin ' + args[2] + ' with tempalte ' + args[3] + '\x1b[0m');
+    console.log('\x1b[32mCreating Plugin ' + args[2] + ' with template ' + args[3] + '\x1b[0m');
 
     var gitUrl = isURL(args[3]) || isDirectory(args[3]) 
       ? args[3] 
