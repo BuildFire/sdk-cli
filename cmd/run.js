@@ -9,31 +9,34 @@ function run(args) {
     }
 
     var defaultPort = 3030;
-    if(Array.isArray(args) && args.length > 1) {
+    if (Array.isArray(args) && args.length > 1) {
         if (isNaN(parseInt(args[1]))) {
             console.error('\x1b[31m Error: Please specify a valid port number. (Note: This parameter is optional.)');
             return;
         } else {
-            defaultPort= parseInt(args[1]);
+            defaultPort = parseInt(args[1]);
         }
     }
 
-    getAvailablePort(defaultPort, function(port) {
+    getAvailablePort(defaultPort, function (port) {
         var app = express();
         app.use(express.static(process.cwd()));
-        app.listen(port, function() {
+        app.listen(port, function () {
             openBrowser(port);
         });
     });
 
     function openBrowser(port) {
-        console.log('Server running on [::]:' +  port);
+        console.log('Server running on [::]:' + port);
 
-        var isWin = /^win/.test(process.platform),
-            cmd2 = (isWin) ? 'start' : 'open';
-            cmd2 = cmd2 + ' http://localhost:' + port + '/pluginTester/index.html';
+        var isWin = /^win/.test(process.platform);
+        var isLinux = /^linux/.test(process.platform);
+        var cmd2 = '';
 
-        exec(cmd2, function(error, stdout, stderr) {
+        cmd2 = (isWin) ? 'start' : (isLinux) ? 'xdg-open' : 'open';
+        cmd2 = cmd2 + ' http://localhost:' + port + '/pluginTester/index.html';
+
+        exec(cmd2, function (error, stdout, stderr) {
             if (error) {
                 console.log('error', error);
                 console.log('stdout', stdout);
@@ -42,16 +45,16 @@ function run(args) {
         });
     }
 
-    function getAvailablePort (startingAt, cb) {
-        function getNextAvailablePort (currentPort, cb) {
+    function getAvailablePort(startingAt, cb) {
+        function getNextAvailablePort(currentPort, cb) {
             const server = net.createServer();
-            server.listen(currentPort, function() {
-                server.once('close', function() {
+            server.listen(currentPort, function () {
+                server.once('close', function () {
                     cb(currentPort);
                 });
                 server.close();
             });
-            server.on('error', function() {
+            server.on('error', function () {
                 getNextAvailablePort(++currentPort, cb);
             });
         }
