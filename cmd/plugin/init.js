@@ -3,7 +3,26 @@ var git = require('simple-git/promise')();
 var folderExists = require('../../tools/folderExists');
 var isSdkDirectory = require('../../tools/isSdkDirectory');
 var rmDir = require('../../tools/rmDir');
+var fs = require('fs');
 
+function isUrl(str) {
+  var pattern = new RegExp(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/)
+  return str && pattern.test(str);
+}
+
+function isGitUrl(str) {
+  var pattern = new RegExp(/(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$/);
+  return str && pattern.test(str);
+}
+
+function isDirectory(str) {
+  try {
+    var stats = fs.statSync(str);
+    return stats.isDirectory();
+  } catch(e) {
+    return false;
+  }
+}
 
 function initPlugin(args) {
     var cwd = process.cwd();
@@ -29,7 +48,10 @@ function initPlugin(args) {
 
     console.log('\x1b[32mCreating Plugin ' + args[2] + ' with template ' + args[3] + '\x1b[0m');
 
-    git.clone('https://github.com/BuildFire/' + args[3] + 'PluginTemplate.git', targetPath)
+    var gitUrl = isUrl(args[3]) || isGitUrl(args[3]) || isDirectory(args[3])
+      ? args[3]
+      : `https://github.com/BuildFire/${args[3]}PluginTemplate.git`;
+    git.clone(gitUrl, targetPath)
     .then(function() {
       rmDir(path.join(targetPath, '.git'));
 
